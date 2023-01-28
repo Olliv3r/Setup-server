@@ -11,7 +11,7 @@
 #
 # Exemplo:
 #
-#   $ ./setup-server-web
+#   $ ./setup-server
 #   [+] Instalando pacotes...OK
 #   [+] Configurando o Apache...OK
 #   [+] Configurando usuário MySQL...OK
