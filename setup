@@ -38,7 +38,7 @@ animation() {
 }
 
 install_req() {
-    apt update > /dev/null 2>&1
+    apt update -y > /dev/null 2>&1
     apt install apache2 openssl openssl-tool php php-apache phpmyadmin mariadb -y > /dev/null 2>&1
 }
 
@@ -100,7 +100,7 @@ banner_usage() {
     echo -e "\e[34mBugs relate em telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
 }
 
-apt update && apt install ncurses-utils curl -y ; clear
+apt upgrade -y && apt install ncurses-utils curl -y ; clear
 banner
 install_req &> /dev/null & animation "${text_proc[0]}"
 configure_apache &> /dev/null & animation "${text_proc[1]}"
