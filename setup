@@ -66,6 +66,10 @@ configure_apache() {
 	cp apache/extra/httpd-vhosts.conf $PREFIX/etc/apache2/extra
     fi
 
+    if [ -d apache -a -d apache/phpmyadmin -a -f apache/phpmyadmin/config.inc.php ] ; then
+	cp apache/phpmyadmin/config.inc.php $PREFIX/etc/phpmyadmin/config.inc.php
+    fi
+
     touch $PREFIX/etc/apache2/extra/php_module.conf
     echo "<?php phpinfo(); ?>" > $PREFIX/share/apache2/default-site/htdocs/index.php
     sleep 1
