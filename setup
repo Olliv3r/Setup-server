@@ -103,6 +103,10 @@ banner_usage() {
 apt upgrade -y && apt install ncurses-utils curl -y ; clear
 banner
 install_req &> /dev/null & animation "${text_proc[0]}"
+sleep 1
 configure_apache &> /dev/null & animation "${text_proc[1]}"
+sleep 1
 configure_mysql &> /dev/null & animation "${text_proc[2]}"
+sleep 1
 configure_manager &> /dev/null & animation "${text_proc[3]}"
+sleep 1
