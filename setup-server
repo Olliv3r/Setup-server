@@ -1,6 +1,39 @@
 #!/usr/bin/env bash
-# setup - configura servidor web pra uso
+# setup-server - Configura servidor web automaticamente
+# Obs.: Usa arquivos do diretório apache como base
 #
+# Site      : http://programadorboard.epizy.com/autor
+# Autor     : Oliver Silva <programadorboard@gmail.com>
+# Munutençâo: Oliver Silva <programadorboard@gmail.com>
+#
+# ----------------------------------------------------
+# Este programa configura um servidor web de forma automática e retornando o resultado na saída padrão (STDOUT).
+#
+# Exemplo:
+#
+#   $ ./setup-server-web
+#   [+] Instalando pacotes...OK
+#   [+] Configurando o Apache...OK
+#   [+] Configurando usuário MySQL...OK
+#   [+] Configurando gerenciador...OK
+#   [+] Servidor Web configurado...OK
+#   [?] Use o 'server-web' para gerenciar (opcional)
+#   [?] Informaçôes de acesso ao phpmyadmin: 'root' & 'toor'
+#   [!] Bugs, relate em telegram https://t.me/tiooliver_sh
+#
+# Histórico:
+#
+# v1.0 2022-11-28, Oliver Silva:
+#     - Versão inicial configuração do servidor web
+#     - Adicionado instalação do gerenciador de serviços
+#     apache e mysqld_safe
+# 
+# Licença: MIT License
+#
+# Versão 1.0: Instalação, configuração do servidor web e gerenciador server-web
+#
+#
+
 
 text_proc=(
 	"Instalando pacotes"
@@ -10,12 +43,17 @@ text_proc=(
 )
 
 banner() {
-echo -e "\n███─███─████─█─█─███─████────███─███─███─█─█─████
-█───█───█──█─█─█─█───█──█────█───█────█──█─█─█──█
-███─███─████─█─█─███─████────███─███──█──█─█─████
-──█─█───█─█──███─█───█─█───────█─█────█──█─█─█───
-███─███─█─█───█──███─█─█─────███─███──█──███─█───
-\nSetup web server\n"
+echo -e "\n\e[31m███─███─███─█─█─████────███─███─████─█─█─███─████
+█───█────█──█─█─█──█────█───█───█──█─█─█─█───█──█
+███─███──█──█─█─████────███─███─████─█─█─███─████
+──█─█────█──█─█─█─────────█─█───█─█──███─█───█─█─
+███─███──█──███─█───────███─███─█─█───█──███─█─█\e[0m
+\n\e[32;2m$(version | tr A-Z a-z)\e[0m\n"
+}
+
+version() {
+    echo -n "$(basename "$0")"
+    grep "^# Versão" "$0" | tail -1 | cut -d : -f 1 | tr -d \#
 }
 
 animation() {
@@ -26,7 +64,7 @@ animation() {
     while [ $(ps a | awk '{print $1}' | grep $pid) ] ; do
 	for i in ${spinner[@]}; do
 	    tput civis
-	    printf "\r[*] $1...${i}"
+	    printf "\r\e[34m[*] $1...${i}"
 	    sleep $delay
 	    printf "\b\b\b\b\b\b\b\b";
         done
@@ -34,7 +72,7 @@ animation() {
 
     tput cnorm
     printf "\b\b\b\b\b\b"
-    printf "\r[+] $1...OK\n"
+    printf "\r\e[34m[+] $1...\e[32;2mOK\e[0m\n"
 }
 
 install_req() {
@@ -90,14 +128,14 @@ configure_manager() {
     sleep 2
     cp Server-web/server-web .
 
-    [ -d ~/Server-web ] && rm -rf ~/Server-web
+    [ -d ~/setup-web-server/Server-web ] && rm -rf ~/setup-web-server/Server-web
 }
 
 banner_usage() {
     echo -e "\e[34m[+] Servidor Web configurado...\e[32;2mOK\e[0m"
-    echo -e "\e[34m[?] Use o '\e[31;1mserver-web\e[34m' para gerenciar (opcional)\e[0m"
-    echo -e "\e[34m[?] Informaçôes de acesso ao phpmyadmin: '\e[31;1mroot\e[0m' & '\e[31;1mtoor\e[0m'"
-    echo -e "\e[34mBugs relate em telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
+    echo -e "\e[34m[?] Use o '\e[32;2mserver-web\e[0m\e[34m' para gerenciar (opcional)\e[0m"
+    echo -e "\e[34m[?] Informaçôes de acesso ao phpmyadmin: '\e[32;2mroot\e[0m\e[34m' & '\e[32;2mtoor'\e[0m"
+    echo -e "\e[34m[!] Bugs, relate em telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
 }
 
 apt upgrade -y && apt install ncurses-utils curl -y ; clear
@@ -110,3 +148,4 @@ configure_mysql &> /dev/null & animation "${text_proc[2]}"
 sleep 1
 configure_manager &> /dev/null & animation "${text_proc[3]}"
 sleep 1
+banner_usage
