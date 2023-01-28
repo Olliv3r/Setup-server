@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# setup - configura servidor web pra uso
+#
+
+text_proc=(
+	"Instalando pacotes"
+	"Configurando o Apache"
+	"Configurando usuário MySQL"
+	"Configurando gerenciador"
+)
+
+banner() {
+echo -e "\n███─███─████─█─█─███─████────███─███─███─█─█─████
+█───█───█──█─█─█─█───█──█────█───█────█──█─█─█──█
+███─███─████─█─█─███─████────███─███──█──█─█─████
+──█─█───█─█──███─█───█─█───────█─█────█──█─█─█───
+███─███─█─█───█──███─█─█─────███─███──█──███─█───
+\nSetup web server\n"
+}
+
+animation() {
+    local delay=0.25
+    local pid=$!
+    spinner=('\' '/' '-' '\' '/' '-')
+
+    while [ $(ps a | awk '{print $1}' | grep $pid) ] ; do
+	for i in ${spinner[@]}; do
+	    tput civis
+	    printf "\r[*] $1...${i}"
+	    sleep $delay
+	    printf "\b\b\b\b\b\b\b\b";
+        done
+    done
+
+    tput cnorm
+    printf "\b\b\b\b\b\b"
+    printf "\r[+] $1...OK\n"
+}
+
+install_req() {
+    apt update > /dev/null 2>&1
+    apt install apache2 openssl openssl-tool php php-apache phpmyadmin mariadb -y > /dev/null 2>&1
+}
+
+configure_apache() {
+    if [ -d apache -a -d apache/extra -a -f apache/extra/httpd.conf ] ; then
+        cp apache/extra/httpd.conf $PREFIX/etc/apache2
+    fi
+
+    if [ -d apache -a -d apache/ssl -a -f apache/ssl/cert.crt -a -f apache/ssl/cert.key ] ; then
+	if [ ! -d $PREFIX/etc/apache2/ssl ] ; then
+	    mkdir $PREFIX/etc/apache2/ssl
+	    chmod 700 $PREFIX/etc/apache2/ssl
+	    cp apache/ssl/cert.* $PREFIX/etc/apache2/ssl/
+        else
+	
+	    rm $PREFIX/etc/apache2/ssl -rf
+	    mkdir $PREFIX/etc/apache2/ssl
+	    chmod 700 $PREFIX/etc/apache2/ssl
+	    cp apache/ssl/cert.* $PREFIX/etc/apache2/ssl/
+	fi
+    fi
+
+    if [ -d apache -a -d apache/extra -a -f apache/extra/httpd-ssl.conf -a apache/extra/httpd-vhosts.conf ] ; then
+	cp apache/extra/httpd-ssl.conf $PREFIX/etc/apache2/extra
+	cp apache/extra/httpd-vhosts.conf $PREFIX/etc/apache2/extra
+    fi
+
+    touch $PREFIX/etc/apache2/extra/php_module.conf
+    echo "<?php phpinfo(); ?>" > $PREFIX/share/apache2/default-site/htdocs/index.php
+    sleep 1
+}
+
+configure_mysql() {
+    pkill mariadb
+    mysqld_safe -u root 1> /dev/null &
+    sleep 2
+
+    mysql -u root -D mysql -e "set password for 'root'@'localhost' = password('toor');"
+    mysql -u root -D mysql -e "flush privileges;"
+    pkill mariadb
+}
+
+configure_manager() {
+    source <(curl -fsSL https://raw.githubusercontent.com/Olliv3r/Server-web/main/setup)
+    sleep 2
+    cp Server-web/server-web .
+
+    [ -d ~/Server-web ] && rm -rf ~/Server-web
+}
+
+banner_usage() {
+    echo -e "\e[34m[+] Servidor Web configurado...\e[32;2mOK\e[0m"
+    echo -e "\e[34m[?] Use o '\e[31;1mserver-web\e[34m' para gerenciar (opcional)\e[0m"
+    echo -e "\e[34m[?] Informaçôes de acesso ao phpmyadmin: '\e[31;1mroot\e[0m' & '\e[31;1mtoor\e[0m'"
+    echo -e "\e[34mBugs relate em telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
+}
+
+apt update && apt install ncurses-utils curl -y ; clear
+banner
+install_req &> /dev/null & animation "${text_proc[0]}"
+configure_apache &> /dev/null & animation "${text_proc[1]}"
+configure_mysql &> /dev/null & animation "${text_proc[2]}"
+configure_manager &> /dev/null & animation "${text_proc[3]}"
