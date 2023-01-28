@@ -128,7 +128,7 @@ configure_manager() {
     sleep 2
     cp Server-web/server-web .
 
-    [ -d ~/setup-web-server/Server-web ] && rm -rf ~/setup-web-server/Server-web
+    [ -d ~/Setup-server/Server-web ] && rm -rf ~/Setup-server/Server-web
 }
 
 banner_usage() {
@@ -136,6 +136,14 @@ banner_usage() {
     echo -e "\e[34m[?] Use o '\e[32;2mserver-web\e[0m\e[34m' para gerenciar (opcional)\e[0m"
     echo -e "\e[34m[?] Informaçôes de acesso ao phpmyadmin: '\e[32;2mroot\e[0m\e[34m' & '\e[32;2mtoor'\e[0m"
     echo -e "\e[34m[!] Bugs, relate em telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
+
+    echo -e "\e[34m[!] Saindo do termux\e[0m"
+    sleep 1
+
+    pid=$(ps -e | cut -c1-6 | tr -d " A-Z")
+    for p in $(pid) ; do
+    kill -9 $p
+    done
 }
 
 apt upgrade -y && apt install ncurses-utils curl -y ; clear
