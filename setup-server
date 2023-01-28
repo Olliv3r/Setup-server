@@ -128,7 +128,7 @@ configure_manager() {
     sleep 2
     cp Server-web/server-web .
 
-    [ -d ~/Setup-server/Server-web ] && rm -rf ~/Setup-server/Server-web
+    [ -d ~/Setup-server/server-web ] && rm -rf ~/Setup-server/server-web
 }
 
 banner_usage() {
