@@ -20,4 +20,5 @@ apt upgrade -y && apt update -y && apt install git -y && git clone https://githu
 - [x] Gerenciador server-web (opcional)
 - [x] Phpmyadmin
 - [x] Apache2
+- [x] Mariadb
 - [ ] Outros
