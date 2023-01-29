@@ -128,6 +128,7 @@ configure_manager() {
     sleep 2
     cp server-web $PREFIX/bin
     chmod +x $PREFIX/bin/server-web
+    chmod +x server-web
 }
 
 banner_usage() {
@@ -136,8 +137,8 @@ banner_usage() {
     echo -e "\e[34m[?] Informaçôes de acesso ao phpmyadmin: '\e[32;2mroot\e[0m\e[34m' & '\e[32;2mtoor'\e[0m"
     echo -e "\e[34m[!] Bugs, relate em telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
 
-    echo -e "\e[34m[!] Saindo do termux, entre novamente e aproveite\e[0m"
-    sleep 1
+    echo -e "\e[34m[!] É necessário reiniciar o termux, entre novamente e aproveite\e[0m"
+    sleep 2
 
     pid=$(ps -e | cut -c1-6 | tr -d " A-Z")
     for p in $pid ; do
