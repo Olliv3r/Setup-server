@@ -16,6 +16,8 @@ apt upgrade -y && apt update -y && apt install git -y && git clone https://githu
 ![dashboard](https://github.com/Olliv3r/Setup-server/blob/main/media/painel-dashboard.jpg)
 
 ## Recursos:
-[x] Certificado SSL
-[x] Gerenciador server-web (opcional)
-[ ] Outros
+- [x] Certificado SSL
+- [x] Gerenciador server-web (opcional)
+- [x] Phpmyadmin
+- [x] Apache2
+- [ ] Outros
