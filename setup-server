@@ -146,7 +146,7 @@ banner_usage() {
     done
 }
 
-apt upgrade -y && apt install ncurses-utils curl -y ; clear
+apt update -y && apt install ncurses-utils curl -y ; clear
 banner
 install_req &> /dev/null & animation "${text_proc[0]}"
 sleep 1
