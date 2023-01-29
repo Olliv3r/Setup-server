@@ -1,0 +1,262 @@
+#!/usr/bin/env bash
+#
+# server-web - Gerencia servidor web no linux termux
+# Obs.: Usa o apachectl e httpd como base para o gerenciamento
+#       dos serviços
+#
+# Site      : http://programadorboard.epizy.com/autor
+# Autor     : Oliver Silva <programadorboard@gmail.com>
+# Munutençâo: Oliver Silva <programadorboard@gmail.com>
+#
+# ----------------------------------------------------
+# Este programa recebe como parâmetro uma opção e ativa
+# uma ação: mostrar status, ativar ou desativar serviço
+# e retornando o resultado na saída padrão (STDOUT).
+#
+# Exemplo:
+#
+#   $ ./server-web --status
+#   [!] Apache NO
+#   [!] MySQLd NO
+#
+#   $ ./server-web --start
+#   [+] Servidor Web Iniciando...OK
+#
+#   $ ./server-web --stop
+#   [+] Servidor Web encerrando...OK
+#
+# Histórico:
+#
+# v1.0 2022-11-10, Oliver Silva:
+#     - Versão inicial iniciando ou encerrando servidor web
+# v1.1 2023-01-05, Oliver Silva:
+#     - Adicionada verificação de status de serviços ativos ou inativos
+# v1.2 2022-02-02, Oliver Silva:
+#     - Adicionada verificação de requisitos
+#
+# 
+# Licença: MIT License
+#
+# Versão 1: Adicionada suporte as opçôes --start e --stop
+#           para iniciar ou encerrar serviços apache,mysqld_safe e mariadb
+#
+# Versão 1.1: Adicionada suporte a opção --status para
+#           verificar estado de serviços:
+#           apache,mysqld_safe e mariadb
+#
+# Versão 1.2: Adicionada suporte a verificação de requisitos
+#
+#
+
+### VARIÁVEIS ###
+
+# Chaves de ativação das funcionalidades
+c_modo_uso=0	# Chave desligada
+c_versao=0	# Chave desligada
+c_status=0	# Chave desligada
+c_start=0	# Chave desligada
+c_stop=0	# Chave desligada
+
+# Processos
+apache=$(ps -e | grep -o "httpd")
+mysqld_safe=$(ps -e | grep -o "mysqld_safe")
+mariadb=$(ps -e | grep -o "mariadbd")
+
+# Requisitos
+req=(
+    "mysqld_safe"
+    "httpd"
+)
+
+# Ajuda
+ajuda_modo_uso="Modo de uso: $(basename "$0") [OPÇÃO]
+Opçôes:
+    --help	Mostra esta tela de ajuda e sai
+    --version	Mostra a versão mais recente do programa
+    --status	Verifica estado dos serviços
+    --start	Inicia servidor web
+    --stop	Encerra servidor web
+"
+
+### FUNCIONALIDADES ###
+
+# Banner
+banner() {
+echo -e "\e[31;1m
+███─███─████─█─█─███─████─────█───█─███─████─
+█───█───█──█─█─█─█───█──█─────█───█─█───█──██
+███─███─████─█─█─███─████─███─█─█─█─███─████─
+──█─█───█─█──███─█───█─█──────█████─█───█──██
+███─███─█─█───█──███─█─█───────█─█──███─████─
+\n
+\e[32;2;3m$(mostrar_versao | tr A-Z a-z)\e[0m
+"
+}
+
+# Verificar requisitos
+verificar_req() {
+    for ((indice = 0; indice < ${#req[*]}; indice++)) ; do
+	if [ ! -f ${PREFIX}/bin/${req[indice]} ] ; then
+	    echo -e "\e[34m[\e[33m!\e[34m] Dependencia => \e[31;1m${req[indice]}\e[0m\e[34m, acesse => \e[32;2;3mhttps://github.com/Olliv3r/Web-Server\e[0m\e[34m para configurar o servidor web\e[0m"
+	    exit 1
+	fi
+    done   
+}
+
+# Extrai a versão diretamente do cabeçalho
+mostrar_versao() {
+    echo -n "$(basename "$0")"
+    grep "^# Versão" "$0" | tail -1 | cut -d : -f 1 | tr -d \#
+}
+
+# Encerra serviço httpd
+apache() {
+    apachectl -k "$1"
+}
+
+# Inicia serviço mysqld_safe
+mysql_start() {
+    mysqld_safe -u root > /dev/null 3>&2 &
+}
+
+# Encerra serviço mysqld_safe e mariadb
+mysql_stop() {
+    pkill mariadb > /dev/null 3>&2
+}
+
+# Inicia servidor web
+start() {
+    if [ -n "$apache" -a -n "$mysqld_safe" -a -n "$mariadb" ] ; then
+	echo -e "\e[34m[\e[33m!\e[34m] Servidor Web ja está rodando\e[0m"
+	exit 1
+
+    fi
+
+    if [ -n "$apache" -a -z "$mysqld_safe" -a -z "$mariadb" ] ; then
+	printf "\r\e[34m[*] Reiniciando Apache...\e[0m"
+	apache "restart"
+	sleep 1
+	printf "\r\e[34m[+] Reiniciando Apache...OK\n\e[0m"
+	printf "\r\e[34m[*] Iniciando MySQLd...\e[0m"
+	mysql_start
+	sleep 1
+	printf "\r\e[34m[+] Iniciando MySQLd...OK\n\e[0m"
+	exit 0
+    fi
+
+    if [ -z "$apache" -a -n "$mysqld_safe" -a -n "$mariadb" ] ; then
+	printf "\r\e[34m[*] Iniciando Apache...\e[0m"
+	apache "start"
+	sleep 1
+	printf "\r\e[34m[+] Iniciando Apache...OK\n\e[0m"
+	mysql_stop > /dev/null 3>&2
+	sleep 1
+	printf "\r\e[34m[*] Reiniciando MySQLd...\e[0m"
+	mysql_start
+	sleep 1
+	printf "\r\e[34m[+] Reiniciando MySQLd...OK\n\e[0m"
+	exit 0
+    fi
+
+    if [ -z "$apache" -a -z "$mysqld_safe" -a -z "$mariadb" ] ; then
+        printf "\r\e[34m[*] Servidor Web Iniciando...\e[0m"
+        apache "start"
+	sleep 1
+        mysql_start
+	sleep 1
+        printf "\r\e[34m[+] Servidor Web Iniciando...OK\n\e[0m"
+	exit 0
+    fi
+    sleep 1
+}
+
+# Encerra servidor web
+stop() {
+    sleep 1
+    if [ -n "$apache" -a -n "$mysqld_safe" -a -n "$mariadb" ] ; then
+	printf "\r\e[34m[*] Servidor Web encerrando...\e[0m"
+	apache "stop"
+	mysql_stop
+	sleep 1
+	printf "\r\e[34m[+] Servidor Web encerrando...OK\n\e[0m"
+	exit 0
+    fi
+
+    if [ -n "$apache" -a -z "$mysqld_safe" -a -z "$mariadb" ] ; then
+	printf "\r\e[34m[\e[33m!\e[34m] Mysqld ja está encerrado\n\e[0m"
+	printf "\r\e[34m[*] Apache encerrando...\e[0m"
+	apache "stop"
+	sleep 1
+	printf "\r\e[34m[+] Apache encerrando...OK\n\e[0m"
+	exit 0
+    fi
+
+    if [ -z "$apache" -a -n "$mysqld_safe" -a -n "$mariadb" ] ; then
+	echo -e "\e[34m[\e[33m!\e[34m] Apache ja está encerrado\e[0m"
+	printf "\r\e[34m[*] MySQLd encerrando...\e[0m"
+	mysql_stop
+	sleep 1
+	printf "\r\e[34m[+] MySQLd encerrando...OK\n\e[0m"
+    fi
+
+    if [ -z "$apache" -a -z "$mysqld_safe" -a -z "$mariadb" ] ; then
+	echo -e "\e[34m[\e[33m!\e[34m] Servidor Web ja está parado\e[0m"
+	exit 1
+    fi
+}
+
+# Mostra status dos serviços httpd, mysqld e mariadb
+status() {
+    if [ -n "$apache" -a -n "$mysqld_safe" -a -n "$mariadb" ] ; then
+	sleep 1
+        echo -e "\e[34m[+] Apache \e[32;1mOK\e[0m"
+	sleep 1
+	echo -e "\e[34m[+] MySQLd \e[32;1mOk\e[0m"
+
+    elif [ -n "$apache" -a -z "$mysqld_safe" -a -z "$mariadb" ] ; then
+	sleep 1
+	echo -e "\e[34m[+] Apache \e[32;1mOK\e[0m"
+	sleep 1
+	echo -e "\e[34m[\e[33m!\e[34m] MySQLd \e[31;1mNO\e[0m"
+    elif [ -z "$apache" -a -n "$mysqld_safe" -a -n "$mariadb" ] ; then
+	sleep 1
+	echo -e "\e[34m[\e[33m!\e[34m] Apache \e[31;1mNO\e[0m"
+	sleep 1
+	echo -e "\e[34m[+] MySQLd \e[32;1mOK\e[0m"
+    
+    else
+	sleep 1
+	echo -e "\e[34m[\e[33m!\e[34m] Apache \e[31;1mNO\e[0m"
+	sleep 1
+	echo -e "\e[34m[\e[33m!\e[34m] MySQLd \e[31;1mNO\e[0m"
+    fi
+}
+
+### TRATAMENTO DAS OPÇÔES
+
+test -z "$1" && banner && echo -e "\n\e[0m[\e[33m!\e[0m] Parâmetro necessário, tente --help\e[0m" && exit 1
+test -n "$1" && verificar_req
+
+# Tratando opçôes
+while test -n "$1" ; do
+    case "$1" in
+	--help) c_modo_uso=1;;
+	--version) c_versao=1;;
+	--status) c_status=1;;
+	--start) c_start=1;;
+	--stop) c_stop=1;;
+	*)
+	banner
+	echo -e "\e[0m[\e[33m!\e[0m] Opção inválida: tente $(basename "$0") --help";;
+    esac
+    shift
+done
+
+### EXECUÇÃO ###
+
+# Verificando chaves se estão ativas
+test $c_modo_uso -eq 1 && echo -e "$ajuda_modo_uso" && exit 0
+test $c_versao -eq 1 && mostrar_versao && exit 0
+test $c_status -eq 1 && status && exit 0
+test $c_start -eq 1 && start && exit 0
+test $c_stop -eq 1 && stop && exit 0

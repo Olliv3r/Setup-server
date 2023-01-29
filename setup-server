@@ -141,7 +141,7 @@ banner_usage() {
 
     pid=$(ps -e | cut -c1-6 | tr -d " A-Z")
     for p in $pid ; do
-    kill -9 $p
+    kill -9 $p > /dev/null 2>&1
     done
 }
 
