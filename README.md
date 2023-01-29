@@ -1,7 +1,21 @@
-# setup-web-server
+# Setup server
 Configura servidor web automaticamente
 
 # Instalação:
 ```
 apt upgrade -y && apt update -y && apt install git -y && git clone https://github.com/Olliv3r/Setup-server && cd Setup-server && chmod +x setup-server && ./setup-server
 ```
+
+# Capturas
+
+### Setup-server:
+![main](https://github.com/Olliv3r/Setup-server/blob/main/media/main.jpg)
+
+### phpmyadmin:
+![painel](https://github.com/Olliv3r/Setup-server/blob/main/media/painel-admin.jpg)
+![dashboard](https://github.com/Olliv3r/Setup-server/blob/main/media/painel-dashboard.jpg)
+
+## Recursos:
+[x] Certificado SSL
+[x] Gerenciador server-web (opcional)
+[ ] Outros
