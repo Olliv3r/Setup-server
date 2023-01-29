@@ -124,11 +124,10 @@ configure_mysql() {
 }
 
 configure_manager() {
-    source <(curl -fsSL https://raw.githubusercontent.com/Olliv3r/Server-web/main/setup)
+    curl -LO https://raw.githubusercontent.com/Olliv3r/Server-web/main/server-web > /dev/null 2>&1
     sleep 2
-    cp Server-web/server-web .
-
-    [ -d ~/Setup-server/Server-web ] && rm -rf ~/Setup-server/Server-web
+    cp server-web $PREFIX/bin
+    chmod +x $PREFIX/bin/server-web
 }
 
 banner_usage() {
