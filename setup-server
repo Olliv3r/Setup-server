@@ -76,8 +76,8 @@ animation() {
 }
 
 install_req() {
-    apt update -y > /dev/null 2>&1
-    apt install apache2 openssl openssl-tool php php-apache phpmyadmin mariadb -y > /dev/null 2>&1
+    apt update > /dev/null 2>&1
+    apt install curl apache2 openssl openssl-tool php php-apache phpmyadmin mariadb -y > /dev/null 2>&1
 }
 
 configure_apache() {
@@ -146,7 +146,7 @@ banner_usage() {
     done
 }
 
-apt update -y && apt install ncurses-utils curl -y ; clear
+apt update && apt upgrade -y && apt update && apt install ncurses-utils -y ; clear
 banner
 install_req &> /dev/null & animation "${text_proc[0]}"
 sleep 1
