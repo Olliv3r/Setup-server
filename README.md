@@ -3,7 +3,7 @@ Configura servidor web automaticamente
 
 # Instalação:
 ```
-apt update -y && apt install git -y && git clone https://github.com/Olliv3r/Setup-server && cd Setup-server && chmod +x setup-server && ./setup-server
+apt update && apt upgrade -y && apt update && apt install git -y && git clone https://github.com/Olliv3r/Setup-server && cd Setup-server && chmod +x setup-server && ./setup-server
 ```
 
 # Capturas
