@@ -39,7 +39,7 @@ text_proc=(
 	"Instalando pacotes"
 	"Configurando o Apache"
 	"Configurando usuário MySQL"
-	"Configurando gerenciador"
+	"Configurando gerenciador opcional"
 )
 
 banner() {
@@ -109,7 +109,7 @@ configure_apache() {
     fi
 
     touch $PREFIX/etc/apache2/extra/php_module.conf
-    echo "<?php phpinfo(); ?>" > $PREFIX/share/apache2/default-site/htdocs/index.php
+    echo "<?php phpinfo(); ?>" > /sdcard/htdocs/index.php
     sleep 1
 }
 
@@ -135,8 +135,8 @@ banner_usage() {
     echo -e "\e[34m[+] Servidor Web configurado...\e[32;2mOK\e[0m"
     echo -e "\e[34m[?] Use o '\e[32;2mserver-web\e[0m\e[34m' para gerenciar (opcional)\e[0m"
     echo -e "\e[34m[?] Informaçôes de acesso ao phpmyadmin: '\e[32;2mroot\e[0m\e[34m' & '\e[32;2mtoor'\e[0m"
+    echo -e "\e[34m[?] Hospede todos os seus projetos em \e[32;2m/sdcard/htdocs\e[0m"
     echo -e "\e[34m[!] Bugs, relate em telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
-
     echo -e "\e[34m[!] É necessário reiniciar o termux, entre novamente e aproveite\e[0m"
     sleep 2
 
@@ -146,8 +146,24 @@ banner_usage() {
     done
 }
 
-apt update && apt install ncurses-utils -y ; clear
+verify_storage() {
+    echo -e "\e[33;1mPermita o acesso a memoria interna!\e[0m"
+    sleep 2
+    termux-setup-storage
+    sleep 2
+
+    [ ! -d $HOME/storage ] && verify_storage
+    [ -d $HOME/storage -a ! -d $HOME/storage/shared/htdocs ] && mkdir -p $HOME/storage/shared/htdocs
+   [ -d $HOME/storage -a -d $HOME/storage/shared/htdocs ] && rm -rf $HOME/storage/shared/htdocs $HOME/storage/shared/htdocs && mkdir $HOME/storage/shared/htdocs
+}
+
+verify_storage
+
+apt update && apt install ncurses-utils -y
+
+clear
 banner
+
 install_req &> /dev/null & animation "${text_proc[0]}"
 sleep 1
 configure_apache &> /dev/null & animation "${text_proc[1]}"
