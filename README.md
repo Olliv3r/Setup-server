@@ -9,7 +9,7 @@ apt update && apt upgrade -y && apt update && apt install git -y && git clone ht
 # Capturas
 
 ### Setup-server:
-![main](https://github.com/Olliv3r/Setup-server/blob/main/media/main.jpg)
+![main](https://github.com/Olliv3r/Setup-server/blob/main/media/Main.jpg)
 
 ### phpmyadmin:
 ![painel](https://github.com/Olliv3r/Setup-server/blob/main/media/painel-admin.jpg)
