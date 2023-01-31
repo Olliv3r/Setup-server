@@ -7,43 +7,37 @@
 # Munutençâo: Oliver Silva <programadorboard@gmail.com>
 #
 # ----------------------------------------------------
-# Este programa configura um servidor web de forma automática e retornando o resultado na saída padrão (STDOUT).
+# Este programa configura um servidor web de forma automática e retorna o resultado na saída padrão (STDOUT).
 #
 # Exemplo:
 #
 #   $ ./setup-server
-#   [+] Instalando pacotes...OK
-#   [+] Configurando o Apache...OK
-#   [+] Configurando usuário MySQL...OK
-#   [+] Configurando gerenciador...OK
-#   [+] Servidor Web configurado...OK
-#   [?] Use o 'server-web' para gerenciar (opcional)
-#   [?] Informaçôes de acesso ao phpmyadmin: 'root' & 'toor'
-#   [!] Bugs, relate em telegram https://t.me/tiooliver_sh
+#   [*] Instalando requisitos...
 #
 # Histórico:
 #
 # v1.0 2022-11-28, Oliver Silva:
 #     - Versão inicial configuração do servidor web
 #     - Adicionado instalação do gerenciador de serviços
-#     apache e mysqld_safe
+#     Apache e MariaDB
 # v1.1 2023-01-30, Oliver Silva:
-#     - Adicionada acesso a pasta /sdcard/htdocs
-# 
+#     - Adicionada suporte de acesso a pasta /sdcard/htdocs
+#
 # Licença: MIT License
 #
 # Versão 1.0: Instalação, configuração do servidor web e gerenciador server-web
 # Versão 1.1: Configurado a hospedagem de projetos na pasta /sdcard/htdocs
 #
 
-
+# Mensagens explicativas no processo de instalação completa
 text_proc=(
-	"Instalando pacotes"
-	"Configurando o Apache"
-	"Configurando usuário MySQL"
+	"Instalando requisitos"
+	"Configurando o apache"
+	"Configurando usuário root do MySQL"
 	"Configurando gerenciador server-web"
 )
 
+# Apresentação do programa de instalação
 banner() {
 echo -e "\n\e[31m███─███─███─█─█─████────███─███─████─█─█─███─████
 █───█────█──█─█─█──█────█───█───█──█─█─█─█───█──█
@@ -53,11 +47,13 @@ echo -e "\n\e[31m███─███─███─█─█─████─
 \n\e[32;2m$(version | tr A-Z a-z)\e[0m\n"
 }
 
+# Versão mais recente extraída diretamente do cabeçalho do programa
 version() {
     echo -n "$(basename "$0")"
     grep "^# Versão" "$0" | tail -1 | cut -d : -f 1 | tr -d \#
 }
 
+# Animação da instalação
 animation() {
     local delay=0.25
     local pid=$!
@@ -77,11 +73,13 @@ animation() {
     printf "\r\e[34m[+] $1...\e[32;2mOK\e[0m\n"
 }
 
+# Instalação dos requisitos
 install_req() {
     apt update > /dev/null 2>&1
     apt install curl apache2 openssl openssl-tool php php-apache phpmyadmin mariadb -y > /dev/null 2>&1
 }
 
+# Configura o apache
 configure_apache() {
     if [ -d apache -a -d apache/extra -a -f apache/extra/httpd.conf ] ; then
         cp apache/extra/httpd.conf $PREFIX/etc/apache2
@@ -93,7 +91,7 @@ configure_apache() {
 	    chmod 700 $PREFIX/etc/apache2/ssl
 	    cp apache/ssl/cert.* $PREFIX/etc/apache2/ssl/
         else
-	
+
 	    rm $PREFIX/etc/apache2/ssl -rf
 	    mkdir $PREFIX/etc/apache2/ssl
 	    chmod 700 $PREFIX/etc/apache2/ssl
@@ -115,6 +113,7 @@ configure_apache() {
     sleep 1
 }
 
+# Configura o usuário root do MySQL
 configure_mysql() {
     pkill mariadb
     mysqld_safe -u root 1> /dev/null &
@@ -125,6 +124,7 @@ configure_mysql() {
     pkill mariadb
 }
 
+# Configura o gerenciador Server-Web
 configure_manager() {
     curl -LO https://raw.githubusercontent.com/Olliv3r/Server-web/main/server-web > /dev/null 2>&1
     sleep 2
@@ -133,57 +133,107 @@ configure_manager() {
     chmod +x server-web
 }
 
-verify_file() {
-    # directory/file
+# Checa a existência de varios programas
+check_program_all() {
+    local dir=$PREFIX/bin
+    local total=0
 
-    if [ -e ${1}/${2} -a -f ${1}/${2} ] ; then
+    for program in $dir/$1* ; do
+	program=$(basename "$program")
+	total=$((total +1))
+    done
 
-	if [ "${2}" == "server-web" ] ; then
-	    echo -e "\e[34m[+] Gerencie com server-web (opcional)\e[0m"
+    if [ $total -eq 1 ] ; then
+        if [ "$1" == "mysql" -o "$1" == "mariadb" ] ; then
+	    echo -e "\e[33;1m[!] Mariadb não está instalado\e[0m"
+
+	else
+	    echo -e "\e[33;1m[!] $1 não está instalado\e[0m"
 	fi
 
-	if [ "${2}" == "mysqld_safe" ] ; then
-	    echo -e "\e[34m[+] Servidor instalado com sucesso\e[0m"
-	    echo -e "\e[34m[+] Informaçôes de login ao phpmyadmin: '\e[32;2mroot\e[0m\e[34m', '\e[32;2mtoor'\e[0m"
-	    echo -e "\e[34m[+] Hospede todos os seus projetos em \e[32;2m/sdcard/htdocs\e[0m"
+    elif [ $total -gt 1 ] ; then
+        if [ "$1" == "mysql" -o "$1" == "mariadb" ] ; then
+            echo -e "\e[34m[+] $2 instalado com sucesso\e[0m"
+
+	else
+	    echo -e "\e[33;1m[!] $1 está instalado\e[0m"
 	fi
 
     else
-        echo -e "\e[33;1m[!] Ocorreu um erro ao instalar $2\e[0m"
+        echo -e "\e[33;1m[!] Erro desconhecido, entre em contato com o autor\e[0m"
     fi
 }
 
-banner_usage() {
-    verify_file $PREFIX/bin "mysqld_safe"
-    verify_file $PREFIX/bin "server-web"
+# Checa a existência de apenas um programa
+check_program_one() {
+    local dir=$PREFIX/bin
+
+    if [ -f $dir/$1 ] ; then
+        if [ "$1" == "server-web" ] ; then
+            echo -e "\e[34m[+] $2 instalado com sucesso\e[0m"
+
+	else
+            echo -e "\e[34m[+] $1 está instalado\e[0m"
+	fi
+
+    else
+	if [ "$1" != "server-web" ] ; then
+	    echo -e "\e[34m[!] $1 não está instalado\e[0m"
+	fi
+    fi
+}
+
+# Mensagem do autor
+message_author() {
     echo -e "\e[34m[!] Bug, relate no telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
+}
+
+# Mostra informaçôes úteis no final da instalação
+final_info() {
+    echo -e "\e[34m[*] Checando existência de programas..."
+    check_program_all "mysql" "MySQL"
+    check_program_all "mariadb" "MariaDB"
+    check_program_one "server-web" "Server-Web"
+
+    message_author
     sleep 2
 }
 
-verify_storage() {
-    echo -e "\e[33;1mPermita o acesso a memoria interna!\e[0m"
-    sleep 2
+# Permite o acesso a memoria interna
+permission_storage_access() {
+    echo -e "\e[33;1mPermita o acesso a memoria interna!\e[0m" | tr a-z A-Z
+    sleep 5
     termux-setup-storage
     sleep 2
-
-    [ ! -d $HOME/storage ] && verify_storage
-    [ -d $HOME/storage -a ! -d $HOME/storage/shared/htdocs ] && mkdir -p $HOME/storage/shared/htdocs
-   [ -d $HOME/storage -a -d $HOME/storage/shared/htdocs ] && rm -rf $HOME/storage/shared/htdocs $HOME/storage/shared/htdocs && mkdir $HOME/storage/shared/htdocs
 }
 
-verify_storage
+# Checa se tem permissão a memoria interna
+check_storage_access() {
+    [ ! -d $HOME/storage ] && permission_storage_access
+    [ -d $HOME/storage -a ! -d $HOME/storage/shared/htdocs ] && mkdir -p $HOME/storage/shared/htdocs
+    [ -d $HOME/storage -a -d $HOME/storage/shared/htdocs ] && rm -rf $HOME/storage/shared/htdocs && mkdir $HOME/storage/shared/htdocs
+}
 
-apt update && apt install ncurses-utils -y
+# Função principal
+main() {
+    check_storage_access
 
-clear
-banner
+    apt update && apt install ncurses-utils -y
+    clear
 
-install_req &> /dev/null & animation "${text_proc[0]}"
-sleep 1
-configure_apache &> /dev/null & animation "${text_proc[1]}"
-sleep 1
-configure_mysql &> /dev/null & animation "${text_proc[2]}"
-sleep 1
-configure_manager &> /dev/null & animation "${text_proc[3]}"
-sleep 1
-banner_usage
+    banner
+
+    install_req &> /dev/null & animation "${text_proc[0]}"
+    sleep 1
+    configure_apache &> /dev/null & animation "${text_proc[1]}"
+    sleep 1
+    configure_mysql &> /dev/null & animation "${text_proc[2]}"
+    sleep 1
+    configure_manager &> /dev/null & animation "${text_proc[3]}"
+    sleep 1
+
+    final_info
+}
+
+# Envocando função principal
+main
