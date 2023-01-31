@@ -47,7 +47,7 @@ echo -e "\n\e[31m███─███─███─█─█─████─
 \n\e[32;2m$(version | tr A-Z a-z)\e[0m\n"
 }
 
-# Versão mais recente extraída diretamente do cabeçalho do programa
+# VersAo mais recente extraída diretamente do cabeçalho do programa
 version() {
     echo -n "$(basename "$0")"
     grep "^# Versão" "$0" | tail -1 | cut -d : -f 1 | tr -d \#
