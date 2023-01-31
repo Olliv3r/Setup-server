@@ -185,6 +185,7 @@ check_program_one() {
 
 # Mensagem do autor
 message_author() {
+    echo -e "\e[34m[+] Hospede todos os seus projetos em \e[31m/sdcard/htdocs\e[0m"
     echo -e "\e[34m[!] Bug, relate no telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
 }
 
@@ -194,7 +195,6 @@ final_info() {
     check_program_all "mysql" "MySQL"
     check_program_all "mariadb" "MariaDB"
     check_program_one "server-web" "Server-Web"
-
     message_author
     sleep 2
 }
