@@ -200,20 +200,16 @@ final_info() {
 }
 
 # Permite o acesso a memoria interna
-permission_message() {
-    echo -e "\e[33;1mPermita o acesso a memoria interna!\e[0m" | tr a-z A-Z
-}
-
 permission_storage_access() {
-    #echo -e "\e[33;1mPermita o acesso a memoria interna!\e[0m" | tr a-z A-Z
-    sleep 5
+    echo -e "\e[33;1mPermita o acesso a memoria interna!\e[0m" | tr a-z A-Z
+    sleep 2
     termux-setup-storage
     sleep 2
 }
 
 # Checa se tem permissão a memoria interna
 check_storage_access() {
-    [ ! -d $HOME/storage ] && permission_message &&  permission_storage_access
+    [ ! -d $HOME/storage ] && permission_storage_access
     [ -d $HOME/storage -a ! -d $HOME/storage/shared/htdocs ] && mkdir -p $HOME/storage/shared/htdocs
     [ -d $HOME/storage -a -d $HOME/storage/shared/htdocs ] && rm -rf $HOME/storage/shared/htdocs && mkdir $HOME/storage/shared/htdocs
 }
