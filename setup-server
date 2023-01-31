@@ -47,7 +47,7 @@ echo -e "\n\e[31m███─███─███─█─█─████─
 \n\e[32;2m$(version | tr A-Z a-z)\e[0m\n"
 }
 
-# VersAo mais recente extraída diretamente do cabeçalho do programa
+# Versao mais recente extraída diretamente do cabeçalho do programa
 version() {
     echo -n "$(basename "$0")"
     grep "^# Versão" "$0" | tail -1 | cut -d : -f 1 | tr -d \#
@@ -200,8 +200,12 @@ final_info() {
 }
 
 # Permite o acesso a memoria interna
-permission_storage_access() {
+permission_message() {
     echo -e "\e[33;1mPermita o acesso a memoria interna!\e[0m" | tr a-z A-Z
+}
+
+permission_storage_access() {
+    #echo -e "\e[33;1mPermita o acesso a memoria interna!\e[0m" | tr a-z A-Z
     sleep 5
     termux-setup-storage
     sleep 2
@@ -209,7 +213,7 @@ permission_storage_access() {
 
 # Checa se tem permissão a memoria interna
 check_storage_access() {
-    [ ! -d $HOME/storage ] && permission_storage_access
+    [ ! -d $HOME/storage ] && permission_message &&  permission_storage_access
     [ -d $HOME/storage -a ! -d $HOME/storage/shared/htdocs ] && mkdir -p $HOME/storage/shared/htdocs
     [ -d $HOME/storage -a -d $HOME/storage/shared/htdocs ] && rm -rf $HOME/storage/shared/htdocs && mkdir $HOME/storage/shared/htdocs
 }
