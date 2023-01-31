@@ -27,11 +27,13 @@
 #     - Versão inicial configuração do servidor web
 #     - Adicionado instalação do gerenciador de serviços
 #     apache e mysqld_safe
+# v1.1 2023-01-30, Oliver Silva:
+#     - Adicionada acesso a pasta /sdcard/htdocs
 # 
 # Licença: MIT License
 #
 # Versão 1.0: Instalação, configuração do servidor web e gerenciador server-web
-#
+# Versão 1.1: Configurado a hospedagem de projetos na pasta /sdcard/htdocs
 #
 
 
@@ -39,7 +41,7 @@ text_proc=(
 	"Instalando pacotes"
 	"Configurando o Apache"
 	"Configurando usuário MySQL"
-	"Configurando gerenciador opcional"
+	"Configurando gerenciador server-web"
 )
 
 banner() {
@@ -131,19 +133,31 @@ configure_manager() {
     chmod +x server-web
 }
 
-banner_usage() {
-    echo -e "\e[34m[+] Servidor Web configurado...\e[32;2mOK\e[0m"
-    echo -e "\e[34m[?] Use o '\e[32;2mserver-web\e[0m\e[34m' para gerenciar (opcional)\e[0m"
-    echo -e "\e[34m[?] Informaçôes de acesso ao phpmyadmin: '\e[32;2mroot\e[0m\e[34m' & '\e[32;2mtoor'\e[0m"
-    echo -e "\e[34m[?] Hospede todos os seus projetos em \e[32;2m/sdcard/htdocs\e[0m"
-    echo -e "\e[34m[!] Bugs, relate em telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
-    echo -e "\e[34m[!] É necessário reiniciar o termux, entre novamente e aproveite\e[0m"
-    sleep 2
+verify_file() {
+    # directory/file
 
-    pid=$(ps -e | cut -c1-6 | tr -d " A-Z")
-    for p in $pid ; do
-    kill -9 $p > /dev/null 2>&1
-    done
+    if [ -e ${1}/${2} -a -f ${1}/${2} ] ; then
+
+	if [ "${2}" == "server-web" ] ; then
+	    echo -e "\e[34m[+] Gerencie com server-web (opcional)\e[0m"
+	fi
+
+	if [ "${2}" == "mysqld_safe" ] ; then
+	    echo -e "\e[34m[+] Servidor instalado com sucesso\e[0m"
+	    echo -e "\e[34m[+] Informaçôes de login ao phpmyadmin: '\e[32;2mroot\e[0m\e[34m', '\e[32;2mtoor'\e[0m"
+	    echo -e "\e[34m[+] Hospede todos os seus projetos em \e[32;2m/sdcard/htdocs\e[0m"
+	fi
+
+    else
+        echo -e "\e[33;1m[!] Ocorreu um erro ao instalar $2\e[0m"
+    fi
+}
+
+banner_usage() {
+    verify_file $PREFIX/bin "mysqld_safe"
+    verify_file $PREFIX/bin "server-web"
+    echo -e "\e[34m[!] Bug, relate no telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
+    sleep 2
 }
 
 verify_storage() {
