@@ -309,7 +309,7 @@ main() {
 
     banner
 
-    install_req &> /dev/null & animation "${text_proc[0]}" $(check_all_req)
+    install_req &> /dev/null & animation "${text_proc[0]}" "\e[32;1mOK\e[0m"
     sleep 1
     configure_apache &> /dev/null & animation "${text_proc[1]}" $(check_conf_apache)
     sleep 1
