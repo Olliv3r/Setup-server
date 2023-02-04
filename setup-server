@@ -22,11 +22,14 @@
 #     Apache e MariaDB
 # v1.1 2023-01-30, Oliver Silva:
 #     - Adicionada suporte de acesso a pasta /sdcard/htdocs
+# v1.2 2023-04-02, Oliver Silva:
+#     - Adicionada suporte de backup
 #
 # Licença: MIT License
 #
 # Versão 1.0: Instalação, configuração do servidor web e gerenciador server-web
 # Versão 1.1: Configurado a hospedagem de projetos na pasta /sdcard/htdocs
+# Versão 1.2: Realizar backup de projetos antigos antes
 #
 
 # Mensagens explicativas no processo de instalação completa
@@ -39,12 +42,12 @@ text_proc=(
 
 # Apresentação do programa de instalação
 banner() {
-echo -e "\n\e[31m███─███─███─█─█─████────███─███─████─█─█─███─████
+echo -e "\n\e[34;1m███─███─███─█─█─████────███─███─████─█─█─███─████
 █───█────█──█─█─█──█────█───█───█──█─█─█─█───█──█
 ███─███──█──█─█─████────███─███─████─█─█─███─████
 ──█─█────█──█─█─█─────────█─█───█─█──███─█───█─█─
 ███─███──█──███─█───────███─███─█─█───█──███─█─█\e[0m
-\n\e[32;2m$(version | tr A-Z a-z)\e[0m\n"
+\n\e[34;2;3m$(version | tr A-Z a-z)\e[0m\n"
 }
 
 # Versao mais recente extraída diretamente do cabeçalho do programa
@@ -68,9 +71,8 @@ animation() {
         done
     done
 
-    tput cnorm
     printf "\b\b\b\b\b\b"
-    printf "\r\e[34m[+] $1...\e[32;2mOK\e[0m\n"
+    printf "\r\e[34m[+] $1...$2\n"
 }
 
 # Instalação dos requisitos
@@ -127,76 +129,94 @@ configure_mysql() {
 # Configura o gerenciador Server-Web
 configure_manager() {
     curl -LO https://raw.githubusercontent.com/Olliv3r/Server-web/main/server-web > /dev/null 2>&1
-    sleep 2
-    cp server-web $PREFIX/bin
+    sleep 1
+    mv server-web $PREFIX/bin
     chmod +x $PREFIX/bin/server-web
-    chmod +x server-web
 }
 
-# Checa a existência de varios programas
-check_program_all() {
+# Checar se todos os requisitos foram instalados
+check_all_req() {
     local dir=$PREFIX/bin
-    local total=0
+    local total_mysql=0
+    local total_mariadb=0
 
-    for program in $dir/$1* ; do
-	program=$(basename "$program")
-	total=$((total +1))
+    for program_mysql in $dir/mysql* ; do
+	program_mysql=$(basename "$program_mysql")
+	total_mysql=$((total_mysql +1))
     done
 
-    if [ $total -eq 1 ] ; then
-        if [ "$1" == "mysql" -o "$1" == "mariadb" ] ; then
-	    echo -e "\e[33;1m[!] Mariadb não está instalado\e[0m"
+    for program_mariadb in $dir/mariadb* ; do
+	program_mariadb=$(basename "$program_mariadb")
+	total_mariadb=$((total_mariadb +1))
+    done
 
-	else
-	    echo -e "\e[33;1m[!] $1 não está instalado\e[0m"
-	fi
+    if [ $total_mysql -eq 1 -a $total_mariadb -eq 1 -a ! -f $dir/apachectl -a ! -f $dir/httpd ] ; then
+	echo -e "\e[31;1mNO\e[0m"
+    fi
 
-    elif [ $total -gt 1 ] ; then
-        if [ "$1" == "mysql" -o "$1" == "mariadb" ] ; then
-            echo -e "\e[34m[+] $2 instalado com sucesso\e[0m"
-
-	else
-	    echo -e "\e[33;1m[!] $1 está instalado\e[0m"
-	fi
-
-    else
-        echo -e "\e[33;1m[!] Erro desconhecido, entre em contato com o autor\e[0m"
+    if [ $total_mysql -gt 1 -a $total_mariadb -gt 1 -a -f $dir/apachectl -a -f $dir/httpd ] ; then
+	echo -e "\e[32;1mOK\e[0m"
     fi
 }
 
-# Checa a existência de apenas um programa
-check_program_one() {
-    local dir=$PREFIX/bin
+# Checar se todos os arquivos apache foram configurados
+check_conf_apache() {
+    httpd=$(grep -Eo "by:.*httpd" apache/extra/httpd.conf)
+    httpd_ssl=$(grep -Eo "by:.*httpd" apache/extra/httpd-ssl.conf)
+    httpd_vhosts=$(grep -Eo "by:.*httpd" apache/extra/httpd-vhosts.conf)
+    cert_crt=$(grep -Eo "by:.*httpd" apache/ssl/cert.crt)
+    cert_key=$(grep -Eo "by:.*httpd" apache/ssl/cert.key)
 
-    if [ -f $dir/$1 ] ; then
-        if [ "$1" == "server-web" ] ; then
-            echo -e "\e[34m[+] $2 instalado com sucesso\e[0m"
+    if [ -z "$httpd" -a -z "$httpd_ssl" -a -z "$httpd_vhosts" -a -z "$cert_crt" -a -z "$cert_key" ] ; then
+	echo -e "\e[31;1mNO\e[0m"
 
-	else
-            echo -e "\e[34m[+] $1 está instalado\e[0m"
-	fi
-
-    else
-	if [ "$1" != "server-web" ] ; then
-	    echo -e "\e[34m[!] $1 não está instalado\e[0m"
-	fi
     fi
+
+    if [ -n "$httpd" -a -n "$httpd_ssl" -a -n "$httpd_vhosts" -a -n "$cert_crt" -a -n "$cert_key" ] ; then
+	echo -e "\e[32;1mOK\e[0m"
+
+    fi
+}
+
+# checar se o gerenciador foi instalado
+check_manager() {
+    printf "\r\e[34m[*] Configurando server-web...\e[0m"
+    sleep 1
+
+    if [ -f ./server-web ] ; then
+	printf "\r\e[34m[+] Configurando server-web...\e[32;1mOK\e[0m\n"
+
+    fi
+
+    if [ ! -f ./server-web ] ; then
+	printf "\r\e[34m[!] Configurando server-web...\e[31;1mNO\e[0m\n"
+
+    fi
+}
+
+# Checar backup
+check_htdocs_backup() {
+    if [ -d /sdcard/backup_htdocs ] ; then
+	echo -e "\e[34m[+] Backup disponível em \e[32;2m/sdcard/backup_htdocs\e[0m"
+	sleep 0.1
+    fi
+ 
 }
 
 # Mensagem do autor
 message_author() {
-    echo -e "\e[34m[+] Hospede todos os seus projetos em \e[31m/sdcard/htdocs\e[0m"
-    echo -e "\e[34m[!] Bug, relate no telegram \e[33;2;3mhttps://t.me/tiooliver_sh\e[0m"
+    echo -e "\e[34m[+] Hospede todos os seus projetos em \e[32;2m/sdcard/htdocs\e[0m"
+    sleep 0.1
+    check_htdocs_backup
+    echo -e "\e[34m[+] Bug, relate no telegram \e[33;2;4mhttps://t.me/tiooliver_sh\e[0m"
+    sleep 0.1
 }
 
 # Mostra informaçôes úteis no final da instalação
 final_info() {
-    echo -e "\e[34m[*] Checando existência de programas..."
-    check_program_all "mysql" "MySQL"
-    check_program_all "mariadb" "MariaDB"
-    check_program_one "server-web" "Server-Web"
+    check_all_req > /dev/null 2>&1
     message_author
-    sleep 2
+    sleep 0.5
 }
 
 # Permite o acesso a memoria interna
@@ -207,43 +227,99 @@ permission_storage_access() {
     sleep 2
 }
 
+# Configura htaccess
 htaccess() {
     if [ -f apache/extra/.htaccess ] ; then
 	cp apache/extra/.htaccess /sdcard/htdocs
 
     else
-	echo -e "RewriteEngine On\nRewriteCond %{SCRIPT_FILENAME} !-f\nRewriteCond %{SCRIPT_FILENAME} !-d\nRewriteRule ^(.*)$ index.php?url=$1\n" > /sdcard/htdocs/.htaccess
+	echo -e "RewriteEngine On\nRewriteCond %{SCRIPT_FILENAME} !-f\nRewriteCond %{SCRIPT_FILENAME} !-d\nRewriteRule ^(.*)$ index.php?url=\$1" > /sdcard/htdocs/.htaccess
     fi
 
 }
 
+# Renomeia e excluir htdocs antigo
+copy_backup_htdocs() {
+    cp -rf /sdcard/htdocs /sdcard/backup_htdocs/"htdocs-$(date +%d:%m:%Y-%H:%M:%S)"
+    rm -rf /sdcard/htdocs
+}
+
+# Cria htdocs e configura htaccess
+create_htdocs_htaccess() {
+    mkdir -p /sdcard/htdocs
+    htaccess
+}
+
+# Checa diretório htdocs
+check_htdocs() {
+    if [ -d /sdcard/htdocs ] ; then
+	echo -e "\e[33;1mPasta htdocs encontrada, deseja fazer backup y/n? : " ; read res
+
+	if [ -z "$res" ] ; then
+	    echo -e "\e[33;1mErro, tente \e[0my\e[33;1m \e[0m,n\e[33;1m ou \e[0mctr+c\e[33;1m para encerrar\e[0m\n"
+	    check_htdocs
+	fi
+
+	if [ -n "$res" -a "$res" == "y" -o "$res" == "Y" ] ; then
+	    if [ ! -d /sdcard/backup_htdocs ] ; then
+	        mkdir -p /sdcard/backup_htdocs
+
+	    fi
+
+	    copy_backup_htdocs
+	    create_htdocs_htaccess
+
+	elif [ -n "$res" -a "$res" == "n" -o "$res" == "N" ] ; then
+	    rm -rf /sdcard/htdocs
+	    create_htdocs_htaccess
+
+        else
+	
+	    echo -e "\n\e[33;1mErro, tente \e[0my\e[33;1m \e[0m,n\e[33;1m ou \e[0mctr+c\e[33;1m para encerrar\e[0m\n"
+	    check_htdocs
+
+	fi
+    fi
+
+    if [ ! -d /sdcard/htdocs ] ; then
+	create_htdocs_htaccess
+
+    fi
+}
+
 # Checa se tem permissão a memoria interna
 check_storage_access() {
-    [ ! -d $HOME/storage ] && permission_storage_access
-    [ -d $HOME/storage -a ! -d $HOME/storage/shared/htdocs ] && mkdir -p $HOME/storage/shared/htdocs && htaccess
-    [ -d $HOME/storage -a -d $HOME/storage/shared/htdocs ] && rm -rf $HOME/storage/shared/htdocs && mkdir $HOME/storage/shared/htdocs && htaccess
+    if [ ! -d $HOME/storage ] ; then
+	permission_storage_access
+
+    fi
+
+    if [ -d $HOME/storage ] ; then
+	check_htdocs
+
+    fi
 }
 
 # Função principal
 main() {
     check_storage_access
 
-    apt update && apt install ncurses-utils -y
+    apt update && apt upgrade -y && apt install ncurses-utils -y
     clear
 
     banner
 
-    install_req &> /dev/null & animation "${text_proc[0]}"
+    install_req &> /dev/null & animation "${text_proc[0]}" $(check_all_req)
     sleep 1
-    configure_apache &> /dev/null & animation "${text_proc[1]}"
+    configure_apache &> /dev/null & animation "${text_proc[1]}" $(check_conf_apache)
     sleep 1
-    configure_mysql &> /dev/null & animation "${text_proc[2]}"
+    configure_mysql &> /dev/null & animation "${text_proc[2]}" "\e[32;1mOK\e[0m"
     sleep 1
-    configure_manager &> /dev/null & animation "${text_proc[3]}"
+    configure_manager &> /dev/null & check_manager
     sleep 1
 
     final_info
+    tput cnorm
 }
-
 # Envocando função principal
 main
