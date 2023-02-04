@@ -207,11 +207,21 @@ permission_storage_access() {
     sleep 2
 }
 
+htaccess() {
+    if [ -f apache/extra/.htaccess ] ; then
+	cp apache/extra/.htaccess /sdcard/htdocs
+
+    else
+	echo -e "RewriteEngine On\nRewriteCond %{SCRIPT_FILENAME} !-f\nRewriteCond %{SCRIPT_FILENAME} !-d\nRewriteRule ^(.*)$ index.php?url=$1\n" > /sdcard/htdocs/.htaccess
+    fi
+
+}
+
 # Checa se tem permissão a memoria interna
 check_storage_access() {
     [ ! -d $HOME/storage ] && permission_storage_access
-    [ -d $HOME/storage -a ! -d $HOME/storage/shared/htdocs ] && mkdir -p $HOME/storage/shared/htdocs
-    [ -d $HOME/storage -a -d $HOME/storage/shared/htdocs ] && rm -rf $HOME/storage/shared/htdocs && mkdir $HOME/storage/shared/htdocs
+    [ -d $HOME/storage -a ! -d $HOME/storage/shared/htdocs ] && mkdir -p $HOME/storage/shared/htdocs && htaccess
+    [ -d $HOME/storage -a -d $HOME/storage/shared/htdocs ] && rm -rf $HOME/storage/shared/htdocs && mkdir $HOME/storage/shared/htdocs && htaccess
 }
 
 # Função principal

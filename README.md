@@ -18,7 +18,9 @@ apt update && apt upgrade -y && apt update && apt install git -y && git clone ht
 ## Recursos:
 - [x] Certificado SSL
 - [x] Gerenciador server-web (opcional)
-- [x] Phpmyadmin
-- [x] Apache2
-- [x] Mariadb
+- [x] PhpMyAdmin
+- [x] Apache
+- [x] MariaDB
+- [x] Url amigável ativo (a)
+- [x] Hospedagem /sdcard/htdocs
 - [ ] Outros
