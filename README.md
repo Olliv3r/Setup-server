@@ -22,5 +22,5 @@ apt update && apt upgrade -y && apt update && apt install git -y && git clone ht
 - [x] Apache
 - [x] MariaDB
 - [x] Url amigável ativo (a)
-- [x] Hospedagem /sdcard/htdocs
+- [x] Hospedagem em /sdcard/htdocs
 - [ ] Outros
