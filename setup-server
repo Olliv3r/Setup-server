@@ -38,6 +38,9 @@ text_proc=(
 	"Configurando o apache"
 	"Configurando usuário root do MySQL"
 	"Configurando gerenciador server-web"
+	"Checando requisitos necessários"
+	"Checando arquivos apache"
+	"Checando gerenciador server-web"
 )
 
 # Apresentação do programa de instalação
@@ -72,7 +75,7 @@ animation() {
     done
 
     printf "\b\b\b\b\b\b"
-    printf "\r\e[34m[+] $1...\e[32;1mOK\e[0m\n"
+    printf "\r\e[34m[+] $1...\e[32;1mOk\e[0m\n"
 }
 
 # Instalação dos requisitos
@@ -134,65 +137,75 @@ configure_manager() {
     chmod +x $PREFIX/bin/server-web
 }
 
-# Checar se todos os requisitos foram instalados
-#check_all_req() {
-#    local dir=$PREFIX/bin
-#    local total_mysql=0
-#    local total_mariadb=0
-#
-#    for program_mysql in $dir/mysql* ; do
-#	program_mysql=$(basename "$program_mysql")
-#	total_mysql=$((total_mysql +1))
-#    done
-#
-#    for program_mariadb in $dir/mariadb* ; do
-#	program_mariadb=$(basename "$program_mariadb")
-#	total_mariadb=$((total_mariadb +1)
-#    done
-#
-#    if [ $total_mysql -eq 1 -a $total_mariadb -eq 1 -a ! -f $dir/apachectl -a ! -f $dir/httpd ] ; then
-#	echo -e "\e[31;1mNO\e[0m"
-#    fi
-#
-#    if [ $total_mysql -gt 1 -a $total_mariadb -gt 1 -a -f $dir/apachectl -a -f $dir/httpd ] ; then
-#	echo -e "\e[32;1mOK\e[0m"
-#    fi
-#}
+check_all_req() {
+    local dir=$PREFIX/bin
+    local total_mysql
+    local total_mariadb
 
-# Checar se todos os arquivos apache foram configurados
-#check_conf_apache() {
-#    httpd=$(grep -Eo "by:.*httpd" apache/extra/httpd.conf)
-#    httpd_ssl=$(grep -Eo "by:.*httpd" apache/extra/httpd-ssl.conf)
-#    httpd_vhosts=$(grep -Eo "by:.*httpd" apache/extra/httpd-vhosts.conf)
-#    cert_crt=$(grep -Eo "by:.*httpd" apache/ssl/cert.crt)
-#    cert_key=$(grep -Eo "by:.*httpd" apache/ssl/cert.key)
-#
-#    if [ -z "$httpd" -a -z "$httpd_ssl" -a -z "$httpd_vhosts" -a -z "$cert_crt" -a -z "$cert_key" ] ; then
-#	echo -e "\e[31;1mNO\e[0m"
-#
-#    fi
-#
-#    if [ -n "$httpd" -a -n "$httpd_ssl" -a -n "$httpd_vhosts" -a -n "$cert_crt" -a -n "$cert_key" ] ; then
-#	echo -e "\e[32;1mOK\e[0m"
-#
-#    fi
-#}
+    for program_mysql in $dir/mysql* ; do
+	program_mysql=$(basename "$program_mysql")
+	total_mysql=$((total_mysql +1))
+    done
 
-# checar se o gerenciador foi instalado
-#check_manager() {
-#    printf "\r\e[34m[*] Configurando server-web...\e[0m"
-#    sleep 1
-#
-#    if [ -f ./server-web ] ; then
-#	printf "\r\e[34m[+] Configurando server-web...\e[32;1mOK\e[0m\n"
-#
-#    fi
-#
-#    if [ ! -f ./server-web ] ; then
-#	printf "\r\e[34m[!] Configurando server-web...\e[31;1mNO\e[0m\n"
-#
-#    fi
-#}
+    for program_mariadb in $dir/mariadb* ; do
+	program_mariadb=$(basename "$program_mariadb")
+	total_mariadb=$((total_mariadb +1))
+    done
+
+    printf "\r\e[34m[*] ${text_proc[4]}...\e[0m"
+    sleep 1
+
+    if [ $total_mysql -eq 1 -a $total_mariadb -eq 1 ] ; then
+	printf "\r\e[34m[!] ${text_proc[4]}...\e[31;1mNO\n\e[0m"
+	sleep 0.5
+
+    elif [ $total_mysql -gt 1 -a $total_mariadb -gt 1 ] ; then
+	printf "\r\e[34m[+] ${text_proc[4]}...\e[32;1mOk\n\e[0m"
+	sleep 0.5
+    fi
+}
+
+check_apache_files() {
+    local dir_e=apache/extra
+    local dir_s=apache/ssl
+
+    regex="by.*oliver"
+    command="grep -Eo"
+
+    httpd="$($command $regex ${dir_e}/httpd.conf)"
+    httpd_ssl="$($command $regex ${dir_e}/httpd-ssl.conf)"
+    httpd_vhosts="$($command $regex ${dir_e}/httpd-vhosts.conf)"
+    ssl_crt="$($command $regex ${dir_s}/cert.crt)"
+    ssl_key="$($command $regex ${dir_s}/cert.key)"
+
+    printf "\r\e[34m[*] ${text_proc[5]}...\e[0m"
+    sleep 1
+
+    if [ -z "$httpd" -a -z "$httpd_ssl" -a -z "$httpd_vhosts" -a -z "$ssl_crt" -a -z "$ssl_key" ] ; then
+	printf "\r\e[34m[!] ${text_proc[5]}...\e[31;1mNo\e[0m\n"
+	sleep 0.5
+
+    elif [ -n "$httpd" -a -n "$httpd_ssl" -a -n "$httpd_vhosts" -a -n "$ssl_crt" -a -n "$ssl_key" ] ; then
+	sleep 0.5
+    	printf "\r\e[34m[+] ${text_proc[5]}...\e[32;1mOk\e[0m\n"
+    fi
+}
+
+check_manager() {
+    local dir=$PREFIX/bin
+
+    printf "\r\e[34m[*] ${text_proc[6]}...\e[0m"
+    sleep 1
+
+    if [ ! -f $dir/server-web ] ; then
+	printf "\r\e[34m[!] ${text_proc[6]}...\e[31;1mNo\e[0m\n"
+	sleep 0.5
+
+    elif [ -f $dir/server-web ] ; then
+	printf "\r\e[34m[+] ${text_proc[6]}...\e[32;1mOk\e[0m\n"
+	sleep 0.5
+    fi
+}
 
 # Checar backup
 check_htdocs_backup() {
@@ -213,9 +226,13 @@ message_author() {
 
 # Mostra informaçôes úteis no final da instalação
 final_info() {
-    check_all_req > /dev/null 2>&1
+    clear
+    banner
+    check_all_req
+    check_apache_files
+    check_manager
     message_author
-    sleep 0.5
+    tput cnorm
 }
 
 # Permite o acesso a memoria interna
@@ -318,7 +335,6 @@ main() {
     sleep 1
 
     final_info
-    tput cnorm
 }
 # Envocando função principal
 main
