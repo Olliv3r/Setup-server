@@ -314,7 +314,7 @@ main() {
     sleep 1
     configure_mysql &> /dev/null & animation "${text_proc[2]}"
     sleep 1
-    configure_manager &> /dev/null & animation "${text_proc[2]}"
+    configure_manager &> /dev/null & animation "${text_proc[3]}"
     sleep 1
 
     final_info
