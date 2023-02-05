@@ -135,64 +135,64 @@ configure_manager() {
 }
 
 # Checar se todos os requisitos foram instalados
-check_all_req() {
-    local dir=$PREFIX/bin
-    local total_mysql=0
-    local total_mariadb=0
-
-    for program_mysql in $dir/mysql* ; do
-	program_mysql=$(basename "$program_mysql")
-	total_mysql=$((total_mysql +1))
-    done
-
-    for program_mariadb in $dir/mariadb* ; do
-	program_mariadb=$(basename "$program_mariadb")
-	total_mariadb=$((total_mariadb +1))
-    done
-
-    if [ $total_mysql -eq 1 -a $total_mariadb -eq 1 -a ! -f $dir/apachectl -a ! -f $dir/httpd ] ; then
-	echo -e "\e[31;1mNO\e[0m"
-    fi
-
-    if [ $total_mysql -gt 1 -a $total_mariadb -gt 1 -a -f $dir/apachectl -a -f $dir/httpd ] ; then
-	echo -e "\e[32;1mOK\e[0m"
-    fi
-}
+#check_all_req() {
+#    local dir=$PREFIX/bin
+#    local total_mysql=0
+#    local total_mariadb=0
+#
+#    for program_mysql in $dir/mysql* ; do
+#	program_mysql=$(basename "$program_mysql")
+#	total_mysql=$((total_mysql +1))
+#    done
+#
+#    for program_mariadb in $dir/mariadb* ; do
+#	program_mariadb=$(basename "$program_mariadb")
+#	total_mariadb=$((total_mariadb +1)
+#    done
+#
+#    if [ $total_mysql -eq 1 -a $total_mariadb -eq 1 -a ! -f $dir/apachectl -a ! -f $dir/httpd ] ; then
+#	echo -e "\e[31;1mNO\e[0m"
+#    fi
+#
+#    if [ $total_mysql -gt 1 -a $total_mariadb -gt 1 -a -f $dir/apachectl -a -f $dir/httpd ] ; then
+#	echo -e "\e[32;1mOK\e[0m"
+#    fi
+#}
 
 # Checar se todos os arquivos apache foram configurados
-check_conf_apache() {
-    httpd=$(grep -Eo "by:.*httpd" apache/extra/httpd.conf)
-    httpd_ssl=$(grep -Eo "by:.*httpd" apache/extra/httpd-ssl.conf)
-    httpd_vhosts=$(grep -Eo "by:.*httpd" apache/extra/httpd-vhosts.conf)
-    cert_crt=$(grep -Eo "by:.*httpd" apache/ssl/cert.crt)
-    cert_key=$(grep -Eo "by:.*httpd" apache/ssl/cert.key)
-
-    if [ -z "$httpd" -a -z "$httpd_ssl" -a -z "$httpd_vhosts" -a -z "$cert_crt" -a -z "$cert_key" ] ; then
-	echo -e "\e[31;1mNO\e[0m"
-
-    fi
-
-    if [ -n "$httpd" -a -n "$httpd_ssl" -a -n "$httpd_vhosts" -a -n "$cert_crt" -a -n "$cert_key" ] ; then
-	echo -e "\e[32;1mOK\e[0m"
-
-    fi
-}
+#check_conf_apache() {
+#    httpd=$(grep -Eo "by:.*httpd" apache/extra/httpd.conf)
+#    httpd_ssl=$(grep -Eo "by:.*httpd" apache/extra/httpd-ssl.conf)
+#    httpd_vhosts=$(grep -Eo "by:.*httpd" apache/extra/httpd-vhosts.conf)
+#    cert_crt=$(grep -Eo "by:.*httpd" apache/ssl/cert.crt)
+#    cert_key=$(grep -Eo "by:.*httpd" apache/ssl/cert.key)
+#
+#    if [ -z "$httpd" -a -z "$httpd_ssl" -a -z "$httpd_vhosts" -a -z "$cert_crt" -a -z "$cert_key" ] ; then
+#	echo -e "\e[31;1mNO\e[0m"
+#
+#    fi
+#
+#    if [ -n "$httpd" -a -n "$httpd_ssl" -a -n "$httpd_vhosts" -a -n "$cert_crt" -a -n "$cert_key" ] ; then
+#	echo -e "\e[32;1mOK\e[0m"
+#
+#    fi
+#}
 
 # checar se o gerenciador foi instalado
-check_manager() {
-    printf "\r\e[34m[*] Configurando server-web...\e[0m"
-    sleep 1
-
-    if [ -f ./server-web ] ; then
-	printf "\r\e[34m[+] Configurando server-web...\e[32;1mOK\e[0m\n"
-
-    fi
-
-    if [ ! -f ./server-web ] ; then
-	printf "\r\e[34m[!] Configurando server-web...\e[31;1mNO\e[0m\n"
-
-    fi
-}
+#check_manager() {
+#    printf "\r\e[34m[*] Configurando server-web...\e[0m"
+#    sleep 1
+#
+#    if [ -f ./server-web ] ; then
+#	printf "\r\e[34m[+] Configurando server-web...\e[32;1mOK\e[0m\n"
+#
+#    fi
+#
+#    if [ ! -f ./server-web ] ; then
+#	printf "\r\e[34m[!] Configurando server-web...\e[31;1mNO\e[0m\n"
+#
+#    fi
+#}
 
 # Checar backup
 check_htdocs_backup() {
