@@ -72,7 +72,7 @@ animation() {
     done
 
     printf "\b\b\b\b\b\b"
-    printf "\r\e[34m[+] $1...$2\n"
+    printf "\r\e[34m[+] $1...\e[32;1mOK\e[0m\n"
 }
 
 # Instalação dos requisitos
@@ -200,7 +200,6 @@ check_htdocs_backup() {
 	echo -e "\e[34m[+] Backup disponível em \e[32;2m/sdcard/backup_htdocs\e[0m"
 	sleep 0.1
     fi
- 
 }
 
 # Mensagem do autor
@@ -274,7 +273,7 @@ check_htdocs() {
 	    create_htdocs_htaccess
 
         else
-	
+
 	    echo -e "\n\e[33;1mErro, tente \e[0my\e[33;1m \e[0m,n\e[33;1m ou \e[0mctr+c\e[33;1m para encerrar\e[0m\n"
 	    check_htdocs
 
@@ -309,13 +308,13 @@ main() {
 
     banner
 
-    install_req &> /dev/null & animation "${text_proc[0]}" "\e[32;1mOK\e[0m"
+    install_req &> /dev/null & animation "${text_proc[0]}"
     sleep 1
-    configure_apache &> /dev/null & animation "${text_proc[1]}" $(check_conf_apache)
+    configure_apache &> /dev/null & animation "${text_proc[1]}"
     sleep 1
-    configure_mysql &> /dev/null & animation "${text_proc[2]}" "\e[32;1mOK\e[0m"
+    configure_mysql &> /dev/null & animation "${text_proc[2]}"
     sleep 1
-    configure_manager &> /dev/null & check_manager
+    configure_manager &> /dev/null & animation "${text_proc[2]}"
     sleep 1
 
     final_info
