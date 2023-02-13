@@ -5,8 +5,8 @@ Configura servidor web automaticamente
 ```
 apt update && apt upgrade -y && apt update && apt install git -y && git clone https://github.com/Olliv3r/Setup-server && cd Setup-server && chmod +x setup-server && ./setup-server
 ```
-## Login: `root` & `toor`
-## Capturas
+### Login: `root` & `toor`
+### Capturas
 
 ### Setup-server:
 ![main](https://github.com/Olliv3r/Setup-server/blob/main/media/Main.jpg)
