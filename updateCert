@@ -1,0 +1,49 @@
+#!/usr/bin/bash
+# updateCert - Atualiza certificado
+# 
+# Author: Oliver, <https://programadorboard.epizy.com>
+#
+#
+
+date=", Date: $(date +%d/%m/%y) - $(date +%H:%M) e $(date +%S) segundos"
+comment_crt="BEGIN CERTIFICATE"
+comment_key="BEGIN PRIVATE KEY"
+author="By: oliver, "
+file="File: cert"
+dir=apache/ssl
+dir_other=$PREFIX/etc/apache2/ssl
+
+# Baixa certificado novo
+update() {
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout apache/ssl/cert.key -out apache/ssl/cert.crt
+}
+
+# Subsitue uma string
+regex() {
+    sed -i "s|${comment_crt}|${author}${file}.crt${date}|g" ${dir}/${file:6}.crt
+    sed -i "s|${comment_key}|${author}${file}.key${date}|g" ${dir}/${file:6}.key
+}
+
+# Copia novos arquivos
+copy() {
+    cp ${dir}/${file:6}.crt $dir_other
+    cp ${dir}/${file:6}.key $dir_other
+}
+
+# Verifica certificado atualizado
+verify() {
+    command="grep -Eo"
+    regex="By:.*${date:57}"
+    local pid_crt="$($command "$regex" $dir_other/${file:6}.crt)"
+    local pid_key="$($command "$regex" $dir_other/${file:6}.key)"
+
+    [ -n "$pid_crt" -a -n "$pid_key" ] && echo "Cerificado atualizado" && exit 0
+    [ -z "$pid_crt" -a -z "$pid_key" ] && echo "Falhou ao atualizar o certificado!" && exit 1
+    [ -n "$pid_crt" -a -z "$pid_key" ] && echo "Falhow ao atualizar o certificado!" && exit 1
+    [ -z "$pid_crt" -a -n "$pid_key" ] && echo "Falhow ao atualizar o certificado!" && exit
+}
+
+update
+regex
+copy
+verify

@@ -166,13 +166,14 @@ check_all_req() {
 }
 
 check_apache_files() {
-    local dir_e=apache/extra
-    local dir_s=apache/ssl
+    local dir_e=$PREFIX/etc/apache2/extra
+    local dir_s=$PREFIX/etc/apache2/ssl
+    local date=", Date: $(date +%d/%m/%y) - $(date +%H:%M) e $(date +%S) segundos"
 
-    regex="by.*oliver"
     command="grep -Eo"
+    regex="By:.*${date:57}"
 
-    httpd="$($command $regex ${dir_e}/httpd.conf)"
+    httpd="$($command $regex ${PREFIX}/etc/apache2/httpd.conf)"
     httpd_ssl="$($command $regex ${dir_e}/httpd-ssl.conf)"
     httpd_vhosts="$($command $regex ${dir_e}/httpd-vhosts.conf)"
     ssl_crt="$($command $regex ${dir_s}/cert.crt)"
@@ -229,8 +230,9 @@ final_info() {
     clear
     banner
     check_all_req
-    check_apache_files
     check_manager
+    check_apache_files
+    #check_manager
     message_author
     tput cnorm
 }
