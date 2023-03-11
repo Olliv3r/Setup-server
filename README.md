@@ -5,6 +5,12 @@ Configura servidor web automaticamente
 ```
 apt update && apt upgrade -y && apt update && apt install git -y && git clone https://github.com/Olliv3r/Setup-server && cd Setup-server && chmod +x setup-server && ./setup-server
 ```
+
+*Obs* Caso deseja atualizar o certificado, basta executar o script `updateCert` dentro do diretório raiz deste projeto, deixe os campos em branco dando ENTER:
+```
+bash ./updateCert 
+```
+
 ### Capturas
 ### Setup-server:
 ![main](https://github.com/Olliv3r/Setup-server/blob/main/media/Main.jpg)
