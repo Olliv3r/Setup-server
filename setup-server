@@ -176,17 +176,15 @@ check_apache_files() {
     httpd="$($command $regex ${PREFIX}/etc/apache2/httpd.conf)"
     httpd_ssl="$($command $regex ${dir_e}/httpd-ssl.conf)"
     httpd_vhosts="$($command $regex ${dir_e}/httpd-vhosts.conf)"
-    ssl_crt="$($command $regex ${dir_s}/cert.crt)"
-    ssl_key="$($command $regex ${dir_s}/cert.key)"
 
     printf "\r\e[34m[*] ${text_proc[5]}...\e[0m"
     sleep 1
 
-    if [ -z "$httpd" -a -z "$httpd_ssl" -a -z "$httpd_vhosts" -a -z "$ssl_crt" -a -z "$ssl_key" ] ; then
+    if [ -z "$httpd" -a -z "$httpd_ssl" -a -z "$httpd_vhosts" -a ! -f $dir_s/cert.crt -a ! -f $dir_s/cert.key ] ; then
 	printf "\r\e[34m[!] ${text_proc[5]}...\e[31;1mNo\e[0m\n"
 	sleep 0.5
 
-    elif [ -n "$httpd" -a -n "$httpd_ssl" -a -n "$httpd_vhosts" -a -n "$ssl_crt" -a -n "$ssl_key" ] ; then
+    elif [ -n "$httpd" -a -n "$httpd_ssl" -a -n "$httpd_vhosts" -a -f $dir_s/cert.crt -a -f $dir_s/cert.key ] ; then
 	sleep 0.5
     	printf "\r\e[34m[+] ${text_proc[5]}...\e[32;1mOk\e[0m\n"
     fi
