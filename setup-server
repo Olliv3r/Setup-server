@@ -43,14 +43,15 @@ text_proc=(
 	"Checando gerenciador server-web"
 )
 
+reqList=("mysql" "httpd" "openssl" "php")
+
 # Apresentação do programa de instalação
 banner() {
-echo -e "\n\e[34;1m███─███─███─█─█─████────███─███─████─█─█─███─████
-█───█────█──█─█─█──█────█───█───█──█─█─█─█───█──█
-███─███──█──█─█─████────███─███─████─█─█─███─████
-──█─█────█──█─█─█─────────█─█───█─█──███─█───█─█─
-███─███──█──███─█───────███─███─█─█───█──███─█─█\e[0m
-\n\e[34;2;3m$(version | tr A-Z a-z)\e[0m\n"
+echo -e "\n\e[34;1m
+█▀▀ █▀▀ ▀▀█▀▀ █░░█ █▀▀█ 　 █▀▀ █▀▀ █▀▀█ ▀█░█▀ █▀▀ █▀▀█
+▀▀█ █▀▀ ░░█░░ █░░█ █░░█ 　 ▀▀█ █▀▀ █▄▄▀ ░█▄█░ █▀▀ █▄▄▀
+▀▀▀ ▀▀▀ ░░▀░░ ░▀▀▀ █▀▀▀ 　 ▀▀▀ ▀▀▀ ▀░▀▀ ░░▀░░ ▀▀▀ ▀░▀▀
+\e[0m\n\e[34;2;3m$(version | tr A-Z a-z)\e[0m\n"
 }
 
 # Versao mais recente extraída diretamente do cabeçalho do programa
@@ -230,7 +231,6 @@ final_info() {
     check_all_req
     check_manager
     check_apache_files
-    #check_manager
     message_author
     tput cnorm
 }
