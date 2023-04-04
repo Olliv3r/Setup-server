@@ -34,7 +34,8 @@
 #
 # Versão 0.1: Instalação, configuração do servidor web e gerenciador server-web
 # Versão 0.2: Configurado a hospedagem de projetos na pasta /sdcard/htdocs
-# Versão 0.3: Realizar backup de projetos antigos antes Versão 0.4: Adicionado suporte para habilitar, desabilitar e atualizar o certificado
+# Versão 0.3: Realizar backup de projetos antigos antes
+# Versão 0.4: Adicionado suporte para habilitar, desabilitar e atualizar o certificado
 # Versão 0.5: Adicionado suporte para opções --setup, --disable-ssl, --enable-ssl e --update-ssl
 #
 
