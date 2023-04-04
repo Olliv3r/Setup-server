@@ -1,7 +1,6 @@
 # Setup server
 Configura um servidor web no aplicativo termux de forma automática  
-![main](https://github.com/Olliv3r/Setup-server/blob/m
-ain/media/Main.jpg)
+![main](https://github.com/Olliv3r/Setup-server/blob/main/media/Main.jpg)
 
 # Instalação:
 ```
