@@ -1,5 +1,5 @@
 # Setup server
-Configura servidor web automaticamente
+Configura um servidor web no aplicativo termux de forma automática  
 ![main](https://github.com/Olliv3r/Setup-server/blob/m
 ain/media/Main.jpg)
 
@@ -30,8 +30,9 @@ Habilitar:
 ![dashboard](https://github.com/Olliv3r/Setup-server/blob/main/media/painel-dashboard.jpg)
 
 #### Obs!
-Se o certificado estiver desabilitado use o `http://localhost:8080/phpmyadmin` para acessar o phpmyadmin
-Ou `https://localhost:8443/phpmyadmin` caso o certificado esta habilitado
+Se o certificado estiver desabilitado use: `http://localhost:8080/phpmyadmin` para acessar o phpmyadmin ou `https://localhost:8443/phpmyadmin` caso o certificado estiver habilitado.
+
+Essa alteração tambem vale para a pasta dos projetos: `htdocs`, Se o certificado tiver desabilitado acesse: `http://localhost:8080` ou `https://localhost:8443` se o certificado estiver habilitado.
 
 ## Recursos:
 - [x] Certificado SSL
