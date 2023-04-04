@@ -336,5 +336,57 @@ main() {
 
     final_info
 }
-# Envocando função principal
-main
+
+helper() {
+    echo -e "Uso: $(basename "$0") OPÇÃO\n\t-h, --help\tMostra esta tela de ajuda\n\t-v, --version\tMostra a versão atual do programa\n\t--setup\t\tConfigura o servidor web de forma automática\n\t--disable-ssl\tDesabilita o certificado ssl\n\t--enable-ssl\tHabilita o certificado ssl\n"
+}
+
+redirectDisable() {
+    if [ -f apache/extra/httpd-vhosts.conf ] ; then
+        cp apache/extra/httpd-vhosts.conf .
+        sed -i 's/Redirect/#Redirect/g' httpd-vhosts.conf
+        if [ -f httpd-vhosts.conf ] ; then
+	    cp httpd-vhosts.conf $PREFIX/etc/apache2/extra/httpd-vhosts.conf
+	    rm httpd-vhosts.conf
+	    echo -e "\e[0m\e[32m[+] Certificado desabilitado com sucesso\e[0m"
+
+        else
+	    echo -e "\e[0m\e[31m[!] Erro ao encontrar o arquivo vhosts.conf\e[0m"
+
+        fi
+
+    else
+	echo -e "\e[0m\e[31m[!] Erro ao encontrar o arquivo vhosts.conf\e[0m"
+    fi
+}
+
+redirectEnable() {
+    if [ -f apache/extra/httpd-vhosts.conf ] ; then
+        cp apache/extra/httpd-vhosts.conf $PREFIX/etc/apache2/extra
+        echo -e "\e[0m\e[32m[+] Certificado habilitado com sucesso\e[0m"
+
+    else
+	echo -e "\e[0m\e[31;1m[!] Erro ao encontrar o arquivo vhosts.conf\e[0m"
+    fi
+}
+
+test -z "$1" && banner && echo -e "\e[0m\e[33mErro, tente -h ou --help para mais informaçôes\e[0m"
+
+while [ -n "$1" ] ; do
+    case "$1" in
+	-h | --help)
+	    helper;;
+	-v | --version)
+	    version;;
+	--setup)
+	    main;;
+	--disable-ssl)
+	    redirectDisable;;
+        --enable-ssl)
+	    redirectEnable;;
+	*)
+	    echo -e "\e[0m\e[31mErro, opção inválida: $1\e[0m"
+	    exit 0
+    esac
+    shift
+done
