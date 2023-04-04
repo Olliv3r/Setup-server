@@ -11,25 +11,31 @@
 #
 # Exemplo:
 #
-#   $ ./setup-server
+#   $ ./setup-server --setup
 #   [*] Instalando requisitos...
 #
 # Histórico:
 #
-# v1.0 2022-11-28, Oliver Silva:
+# v0.1 2022-11-28, Oliver Silva:
+#
 #     - Versão inicial configuração do servidor web
 #     - Adicionado instalação do gerenciador de serviços
 #     Apache e MariaDB
-# v1.1 2023-01-30, Oliver Silva:
+# v0.2 2023-01-30, Oliver Silva:
 #     - Adicionada suporte de acesso a pasta /sdcard/htdocs
-# v1.2 2023-04-02, Oliver Silva:
+# v0.3 2023-02-02, Oliver Silva:
 #     - Adicionada suporte de backup
+# v0.4 2023-03-27, Oliver Silva:
+#     - Adicionado suporte para habilitar, desabilitar e atualizar o certificado
+# v0.5 2023-04-04, Oliver Silva:
+#     - Adicionado suporte a opçôes --setup, --disable-ssl, --enable-ssl e update-ssl
 #
 # Licença: MIT License
 #
-# Versão 1.0: Instalação, configuração do servidor web e gerenciador server-web
-# Versão 1.1: Configurado a hospedagem de projetos na pasta /sdcard/htdocs
-# Versão 1.2: Realizar backup de projetos antigos antes
+# Versão 0.1: Instalação, configuração do servidor web e gerenciador server-web
+# Versão 0.2: Configurado a hospedagem de projetos na pasta /sdcard/htdocs
+# Versão 0.3: Realizar backup de projetos antigos antes Versão 0.4: Adicionado suporte para habilitar, desabilitar e atualizar o certificado
+# Versão 0.5: Adicionado suporte para opções --setup, --disable-ssl, --enable-ssl e --update-ssl
 #
 
 # Mensagens explicativas no processo de instalação completa
@@ -57,7 +63,7 @@ echo -e "\n\e[34;1m
 # Versao mais recente extraída diretamente do cabeçalho do programa
 version() {
     echo -n "$(basename "$0")"
-    grep "^# Versão" "$0" | tail -1 | cut -d : -f 1 | tr -d \#
+    grep "^# Versão" "$0" | tail -1 | cut -d : -f 1 | tr -d \# | tr A-Z a-z
 }
 
 # Animação da instalação
@@ -318,6 +324,7 @@ check_storage_access() {
 
 # Função principal
 main() {
+    echo -e "\e[0m\e[33;1mDer ENTER para continuar" ; read
     check_storage_access
 
     apt update && apt upgrade -y && apt install ncurses-utils -y
@@ -338,10 +345,10 @@ main() {
 }
 
 helper() {
-    echo -e "Uso: $(basename "$0") OPÇÃO\n\t-h, --help\tMostra esta tela de ajuda\n\t-v, --version\tMostra a versão atual do programa\n\t--setup\t\tConfigura o servidor web de forma automática\n\t--disable-ssl\tDesabilita o certificado ssl\n\t--enable-ssl\tHabilita o certificado ssl\n"
+    echo -e "Uso: $(basename "$0") OPÇÃO\n\t-h, --help\tMostra esta tela de ajuda\n\t-v, --version\tMostra a versão atual do programa\n\t--setup\t\tConfigura o servidor web de forma automática\n\t--disable-ssl\tDesabilita o certificado ssl\n\t--enable-ssl\tHabilita o certificado ssl\n\t--update-ssl\tAtualiza o certificado\n"
 }
 
-redirectDisable() {
+disableSsl() {
     if [ -f apache/extra/httpd-vhosts.conf ] ; then
         cp apache/extra/httpd-vhosts.conf .
         sed -i 's/Redirect/#Redirect/g' httpd-vhosts.conf
@@ -360,13 +367,38 @@ redirectDisable() {
     fi
 }
 
-redirectEnable() {
+enableSsl() {
     if [ -f apache/extra/httpd-vhosts.conf ] ; then
         cp apache/extra/httpd-vhosts.conf $PREFIX/etc/apache2/extra
         echo -e "\e[0m\e[32m[+] Certificado habilitado com sucesso\e[0m"
 
     else
 	echo -e "\e[0m\e[31;1m[!] Erro ao encontrar o arquivo vhosts.conf\e[0m"
+    fi
+}
+
+updateSsl() {
+    dir_local=apache/ssl
+    dir_default=$PREFIX/etc/apache2/ssl
+
+    echo -e "\e[0m\e[33;1mDer ENTER para continuar\e[0m" ; read
+
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout $dir_local/cert.key -out $dir_local/cert.crt
+
+    if [ -f $dir_local/cert.crt -a -f $dir_local/cert.key ] ; then
+	cp $dir_local/cert.crt $dir_default
+	cp $dir_local/cert.key $dir_default
+
+	if [ -f $PREFIX/etc/apache2/ssl/cert.crt -a -f $PREFIX/etc/apache2/ssl/cert.key ] ; then
+	    echo -e "\e[0m\e[32m[+] Certificado atualizado\e[0m"
+
+	else
+	    echo -e "\e[0m\e[31m[!] Erro ao atualizar o certificado\e[0m"
+
+	fi
+
+    else
+	echo -e "\e[0m\e[31m[!] Erro ao encontrar arquivos SSL\e[0m"
     fi
 }
 
@@ -381,9 +413,11 @@ while [ -n "$1" ] ; do
 	--setup)
 	    main;;
 	--disable-ssl)
-	    redirectDisable;;
+	    disableSsl;;
         --enable-ssl)
-	    redirectEnable;;
+	    enableSsl;;
+	--update-ssl)
+	    updateSsl;;
 	*)
 	    echo -e "\e[0m\e[31mErro, opção inválida: $1\e[0m"
 	    exit 0

@@ -2,29 +2,31 @@
 Configura um servidor web no aplicativo termux de forma automática  
 ![main](https://github.com/Olliv3r/Setup-server/blob/main/media/Main.jpg)
 
-# Instalação:
+## Instalação:
 ```
 apt update && apt upgrade -y && apt update && apt install git -y && git clone https://github.com/Olliv3r/Setup-server && cd Setup-server && chmod +x setup-server && ./setup-server --setup
 ```
 
-### Atualizar o certificado:
-*Obs* Caso deseja atualizar o certificado, basta executar o script `updateCert` dentro do diretório raiz deste projeto, deixe os campos em branco dando ENTER:
+#### Atualizar o certificado:
+*Obs* Caso deseja atualizar o certificado:
 ```
-bash ./updateCert 
+bash ./setup-server --update-ssl
 ```
 
-### Habilite e desabilite o certificado:
+#### Habilite e desabilite o certificado:
 Desabilitar:
 ```
-./setup-server --disable-ssl
+bash ./setup-server --disable-ssl
 ```
 Habilitar:
 ```
-./setup-server --enable-ssl
+bash ./setup-server --enable-ssl
 ```
 
-### Login: `root` & `toor`
-### phpmyadmin:
+#### Login do painel phpmyadmin:
+Login: `root` & `toor`
+
+phpmyadmin:
 ![painel](https://github.com/Olliv3r/Setup-server/blob/main/media/painel-admin.jpg)
 ![dashboard](https://github.com/Olliv3r/Setup-server/blob/main/media/painel-dashboard.jpg)
 
