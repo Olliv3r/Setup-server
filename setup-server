@@ -134,11 +134,11 @@ configure_apache() {
 # Setup user of MySQL
 configure_mysql() {
     pkill mariadb
-    mysqld_safe -u root 1> /dev/null &
+    maridbd-safe -u root 1> /dev/null &
     sleep 2
 
-    mysql -u root -D mysql -e "set password for 'root'@'localhost' = password('toor');"
-    mysql -u root -D mysql -e "flush privileges;"
+    mariadb -u root -D mysql -e "set password for 'root'@'localhost' = password('toor');"
+    mariadb -u root -D mysql -e "flush privileges;"
     pkill mariadb
 }
 
