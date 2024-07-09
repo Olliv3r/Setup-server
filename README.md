@@ -44,3 +44,8 @@ Essa alteração tambem vale para a pasta dos projetos: `htdocs`, Se o certifica
 - [x] Url amigável ativo (a)
 - [x] Hospedagem em /sdcard/htdocs
 - [ ] Outros
+
+> [!CAUTION]
+> Repo não mais confiável para configurar o servidor, acesse este outro projeto: [Install-Web-Server](https://github.com/Olliv3r/Install-Web-Server)
+
+:) Boa sorte!
